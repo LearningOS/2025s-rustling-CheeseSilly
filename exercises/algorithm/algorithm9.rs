@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -38,6 +37,9 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.items.push(value);
+        self.count += 1;
+        self.heapify_up(self.count);
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -56,9 +58,41 @@ where
         self.left_child_idx(idx) + 1
     }
 
+    fn heapify_up(&mut self, mut idx: usize) {
+        while idx > 1 {
+            let parent = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[parent]) {
+                self.items.swap(idx, parent);
+                idx = parent;
+            } else {
+                break;
+            }
+        }
+    }
+
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        if right > self.count {
+            left
+        } else if (self.comparator)(&self.items[left], &self.items[right]) {
+            left
+        } else {
+            right
+        }
+    }
+    fn heapify_down(&mut self, mut idx: usize) {
+        while self.children_present(idx) {
+            let smallest_child = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[smallest_child], &self.items[idx]) {
+                self.items.swap(smallest_child, idx);
+                idx = smallest_child;
+            } else {
+                break;
+            }
+        }
     }
 }
 
@@ -79,13 +113,23 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default + Clone,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+
+        let top = self.items[1].clone(); // 堆顶
+        self.items[1] = self.items[self.count].clone(); // 最后一个元素放到堆顶
+        self.items.pop();
+        self.count -= 1;
+        self.heapify_down(1);
+
+        Some(top)
     }
 }
 
